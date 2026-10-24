@@ -1,0 +1,32 @@
+<!doctype html><html><head><title>magnum</title></head><body>
+<div class="catalog">
+  <div class="product-card">
+    <a href="/products/9001?city=aktobe" class="quick">Быстрый просмотр
+      <img alt="НАПИТОК ЭНЕРГЕТИЧЕСКИЙ MONSTER ULTRA 0,45 Л Ж/Б" src="https://magnum.kz:1337/uploads/monster.jpg">
+    </a>
+    <div class="info"><a href="/products/9001?city=aktobe">НАПИТОК ЭНЕРГЕТИЧЕСКИЙ MONSTER ULTRA 0,45 Л Ж/Б</a>
+      <span class="price">699 тг</span> <span class="old">899 тг</span> <span>-22%</span></div>
+  </div>
+  <div class="product-card">
+    <a href="/products/9002?city=aktobe" class="quick">Быстрый просмотр
+      <img alt="НАПИТОК ЭНЕРГЕТИЧЕСКИЙ RED BULL 0,25 Л" src="https://magnum.kz:1337/uploads/redbull.jpg">
+    </a>
+    <div class="info"><a href="/products/9002?city=aktobe">НАПИТОК ЭНЕРГЕТИЧЕСКИЙ RED BULL 0,25 Л</a>
+      <span class="price">529 тг</span></div>
+  </div>
+  <div class="product-card">
+    <a href="/products/9003?city=aktobe" class="quick">Быстрый просмотр
+      <img alt="МАКАРОНЫ MAKFA 400 Г" src="https://magnum.kz:1337/uploads/makfa.jpg">
+    </a>
+    <div class="info"><a href="/products/9003?city=aktobe">МАКАРОНЫ MAKFA 400 Г</a>
+      <span class="price">329 тг</span> <span class="old">535 тг</span></div>
+  </div>
+  <div class="product-card">
+    <a href="/products/9004?city=aktobe" class="quick">Быстрый просмотр
+      <img alt="НАПИТОК ЭНЕРГЕТИЧЕСКИЙ MONSTER PIPELINE PUNCH ИМПОРТ США 0,473 Л" src="https://magnum.kz:1337/uploads/pipeline.jpg">
+    </a>
+    <div class="info"><a href="/products/9004?city=aktobe">НАПИТОК ЭНЕРГЕТИЧЕСКИЙ MONSTER PIPELINE PUNCH ИМПОРТ США 0,473 Л</a>
+      <span class="price">1 390 тг</span></div>
+  </div>
+</div>
+</body></html>

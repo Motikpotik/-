@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Отчёты и локальная конфигурация (генерируются на машине пользователя)
+reports/
+reports_demo/
+config.yaml
+*.db

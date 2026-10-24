@@ -1,0 +1,5 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Каталоги</title></head><body>
+<h1>Каталоги</h1>
+<a href="/stock/product/super-tsena/">Каталог супер цена для г. Актобе (гипермаркеты)</a>
+<a href="/stock/product/uutnyj-dom/">Листовка "Уютный дом" г. Актобе</a>
+</body></html>

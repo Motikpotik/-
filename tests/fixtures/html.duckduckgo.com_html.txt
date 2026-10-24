@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>DuckDuckGo</title></head><body>
+<div class="results">
+  <div class="result">
+    <a class="result__a" href="https://example-shop.kz/monster-aussie">Monster Energy Aussie Lemonade импорт Япония 0,355 — купить в Актобе</a>
+    <a class="result__snippet" href="#">Энергетический напиток Monster Aussie Lemonade, лимитированный вкус, импорт. Цена: 2 200 тг за банку.</a>
+  </div>
+  <div class="result">
+    <a class="result__a" href="https://example-pets.kz/food">Корм для собак Monster Meat 12 кг — доставка</a>
+    <a class="result__snippet" href="#">Сухой корм для взрослых собак, цена 9 900 тг.</a>
+  </div>
+  <div class="result">
+    <a class="result__a" href="https://example-review.kz/redbull">Обзор энергетика Red Bull Summer Edition в магазинах Актобе</a>
+    <a class="result__snippet" href="#">Ред Булл летняя серия встречается на полках Дины и Анвара, цену уточняйте на месте.</a>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,73 @@
+{
+  "data": {
+    "products": {
+      "pageInfo": {"total": 8},
+      "edges": [
+        {
+          "id": "1001", "xid": "x1001", "slug": "monster-energy-classic-0-33",
+          "name": "Напиток энергетический Monster Energy Classic 0,33 ж/б",
+          "price": 590, "oldPrice": 690, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/monster-classic.jpg"},
+          "images": [], "stock": {"amount": 14},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1002", "xid": "x1002", "slug": "monster-ultra-white-0-45",
+          "name": "Напиток энергетический Monster Ultra white 0,45 л ж/б",
+          "price": 650, "oldPrice": null, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/monster-ultra.jpg"},
+          "images": [], "stock": {"amount": 8},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1003", "xid": "x1003", "slug": "monster-pipeline-punch-import-ssha-0-473",
+          "name": "Напиток энергетический Monster Pipeline Punch, импорт США, 0,473 л",
+          "price": 1450, "oldPrice": null, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/pipeline.jpg"},
+          "images": [], "stock": {"amount": 2},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1004", "xid": "x1004", "slug": "monster-mango-loco-0-5",
+          "name": "Напиток энергетический Monster Mango Loco 0,5 л",
+          "price": 790, "oldPrice": null, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": null}, "images": [{"url": "https://backend.dinamarket.kz/public/mango.jpg"}],
+          "stock": {"amount": 0},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1005", "xid": "x1005", "slug": "red-bull-energy-0-25",
+          "name": "Напиток энергетический Red Bull Energy 0,25 л ж/б",
+          "price": 550, "oldPrice": null, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/redbull.jpg"},
+          "images": [], "stock": {"amount": 21},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1006", "xid": "x1006", "slug": "lavina-red-storm-0-45",
+          "name": "Напиток энергетический Lavina Red storm 0,45 л ж/б",
+          "price": 286, "oldPrice": 409, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/lavina.jpg"},
+          "images": [], "stock": {"amount": 35},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1007", "xid": "x1007", "slug": "gorilla-original-0-45",
+          "name": "Напиток энергетический Gorilla Original 0,45 л",
+          "price": 450, "oldPrice": null, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/gorilla.jpg"},
+          "images": [], "stock": {"amount": 0},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        },
+        {
+          "id": "1008", "xid": "x1008", "slug": "flash-energy-0-5-upakovka-4",
+          "name": "Напиток энергетический Flash Energy 0,5 л х4 ж/б",
+          "price": 1560, "oldPrice": null, "price_type": "piece", "isWeightProduct": false,
+          "preview": {"url": "https://backend.dinamarket.kz/public/flash.jpg"},
+          "images": [], "stock": {"amount": 5},
+          "categories": [{"id": "111", "name": "Энергетики"}]
+        }
+      ]
+    }
+  }
+}
