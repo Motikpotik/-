@@ -5,7 +5,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import yaml
+except ImportError:  # на iPhone без PyYAML работаем на значениях по умолчанию
+    yaml = None
 
 
 DEFAULT_KEYWORDS = [
@@ -47,6 +50,7 @@ class Config:
     in_stock_only: bool = False
     output_dir: str = "reports"
     use_history: bool = True
+    compact: bool = False       # узкая таблица в консоли (экраны телефонов)
 
     @property
     def search_terms(self) -> list[str]:
@@ -68,6 +72,10 @@ def load_config(path: str | Path | None) -> Config:
         return cfg
     p = Path(path)
     if not p.exists():
+        return cfg
+    if yaml is None:
+        print("[config] PyYAML не установлен — config.yaml игнорируется, "
+              "используются значения по умолчанию и флаги командной строки.")
         return cfg
     data: dict[str, Any] = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
     for key, value in data.items():

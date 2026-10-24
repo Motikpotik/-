@@ -9,8 +9,7 @@ from __future__ import annotations
 import re
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
-
+from ..html import make_soup
 from ..models import Product
 from ..rarity import classify_rarity, detect_brand
 from .base import BaseSource, SourceResult
@@ -37,7 +36,7 @@ class AnvarSource(BaseSource):
         terms = [t for t in self.config.search_terms if len(t) >= 4]
         for url in links[:MAX_LEAFLETS]:
             try:
-                soup = BeautifulSoup(self.client.get(url).text, "lxml")
+                soup = make_soup(self.client.get(url).text)
             except Exception as exc:
                 errors.append(f"Anvar {url}: {exc}")
                 continue
@@ -66,7 +65,7 @@ class AnvarSource(BaseSource):
         return SourceResult(self.code, self._dedupe(products), errors, ["промо-листовки Актобе"])
 
     def _leaflet_links(self, html: str) -> list[str]:
-        soup = BeautifulSoup(html, "lxml")
+        soup = make_soup(html)
         urls: list[str] = []
         for anchor in soup.find_all("a", href=LINK_RE):
             full = urljoin(BASE, anchor["href"].split("?", 1)[0])

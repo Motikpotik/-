@@ -15,8 +15,9 @@ TIER_LABEL = {
 }
 
 
-def print_report(report: RunReport, config, price_changes: dict[int, int | None]) -> None:
-    console = Console()
+def print_report(report: RunReport, config, price_changes: dict[int, int | None],
+                 console: Console | None = None) -> None:
+    console = console or Console()
     stats = report.stats()
 
     summary = (
@@ -36,7 +37,11 @@ def print_report(report: RunReport, config, price_changes: dict[int, int | None]
             console.print(f"  [red]✗ {err}[/]")
 
     if not report.products:
-        console.print("[yellow]Товары не найдены. Проверьте интернет-соединение или放宽 фильтры.[/]")
+        console.print("[yellow]Товары не найдены. Проверьте интернет-соединение или ослабьте фильтры.[/]")
+        return
+
+    if getattr(config, "compact", False):
+        _print_compact(console, report, price_changes)
         return
 
     table = Table(show_lines=False, expand=False, header_style="bold cyan")
@@ -53,6 +58,29 @@ def print_report(report: RunReport, config, price_changes: dict[int, int | None]
         table.add_row(*_row(idx, product, price_changes.get(id(product))))
     console.print(table)
     console.print("[dim]Δ цены — изменение относительно прошлого прогона (reports/history.db).[/]")
+
+
+def _print_compact(console: Console, report: RunReport,
+                   price_changes: dict[int, int | None]) -> None:
+    """5 колонок — для узких экранов телефонов."""
+    table = Table(show_lines=False, expand=False, header_style="bold cyan")
+    table.add_column("#", width=3, no_wrap=True)
+    table.add_column("Редкость", width=9, no_wrap=True)
+    table.add_column("Товар", max_width=34, overflow="fold")
+    table.add_column("Цена, тг", justify="right", width=10, no_wrap=True)
+    table.add_column("Наличие", width=8, no_wrap=True)
+    for idx, p in enumerate(report.products, 1):
+        price = "нет" if p.price is None else f"{p.price:,}".replace(",", " ")
+        stock = {True: "есть", False: "нет"}.get(p.in_stock, "н/д")
+        if p.in_stock is True:
+            stock = f"[green]{stock}[/]"
+        elif p.in_stock is False:
+            stock = f"[red]{stock}[/]"
+        else:
+            stock = f"[dim]{stock}[/]"
+        table.add_row(str(idx), TIER_LABEL.get(p.rarity_tier, p.rarity_tier),
+                      p.name[:70], price, stock)
+    console.print(table)
 
 
 def _row(idx: int, p: Product, previous: int | None) -> tuple:

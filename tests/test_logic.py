@@ -40,6 +40,36 @@ class NormalizeTests(unittest.TestCase):
         self.assertEqual(normalize_name("Monster, Ultra!"), "monster ultra")
 
 
+class HtmlFallbackTests(unittest.TestCase):
+    def test_soup_helper_works(self):
+        from energy_scout.html import HTML_PARSER, make_soup
+        self.assertIn(HTML_PARSER, ("lxml", "html.parser"))
+        soup = make_soup("<html><a href='/products/1?x=1'>X</a></html>")
+        self.assertEqual(soup.find("a").get_text(), "X")
+
+
+class CompactRenderTests(unittest.TestCase):
+    def test_compact_and_full_render(self):
+        import io
+        from rich.console import Console
+        from energy_scout.report.console import print_report
+        from energy_scout.pipeline import run_pipeline
+        for compact in (True, False):
+            config = Config(compact=compact)
+            report = run_pipeline(FixtureClient(FIXTURES), config)
+            buf = io.StringIO()
+            print_report(report, config, {}, console=Console(file=buf, width=140))
+            output = buf.getvalue()
+            self.assertIn("Energy Scout", output)
+            self.assertIn("Monster", output)
+            if compact:
+                self.assertIn("Наличие", output)
+                self.assertNotIn("За литр", output)   # в компактном режиме этой колонки нет
+            else:
+                self.assertIn("За литр", output)
+                self.assertIn("Δ цены", output)
+
+
 class RarityTests(unittest.TestCase):
     def test_ordinary(self):
         tier, tags = classify_rarity("Напиток энергетический Lavina 0,45")

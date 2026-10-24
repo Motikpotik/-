@@ -12,8 +12,7 @@ from __future__ import annotations
 import re
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
-
+from ..html import make_soup
 from ..models import Product
 from ..normalize import parse_all_prices, parse_volume_l, price_per_liter
 from ..rarity import classify_rarity, detect_brand
@@ -39,7 +38,7 @@ class MagnumSource(BaseSource):
         return mapping.get(alias, "aktobe")
 
     def _parse_page(self, html: str) -> dict[str, dict]:
-        soup = BeautifulSoup(html, "lxml")
+        soup = make_soup(html)
         found: dict[str, dict] = {}
 
         # 1) JSON-LD как самый надёжный источник, если разметка присутствует

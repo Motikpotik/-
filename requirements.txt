@@ -1,7 +1,7 @@
 # Energy Scout — зависимости
 httpx>=0.27
 beautifulsoup4>=4.12
-lxml>=5.0
+lxml>=5.0            # опционально: без него парсер уйдёт на встроенный html.parser
 rich>=13.0
-openpyxl>=3.1
-PyYAML>=6.0
+openpyxl>=3.1        # опционально: только для Excel-отчёта (CSV/HTML работают без него)
+PyYAML>=6.0          # опционально: только для config.yaml

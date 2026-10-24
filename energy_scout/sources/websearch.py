@@ -12,8 +12,7 @@ import os
 import re
 from urllib.parse import quote_plus
 
-from bs4 import BeautifulSoup
-
+from ..html import make_soup
 from ..models import Product
 from ..normalize import parse_all_prices, parse_volume_l, price_per_liter
 from ..rarity import classify_rarity, detect_brand
@@ -62,7 +61,7 @@ class WebSearchSource(BaseSource):
 
     def _ddg(self, query: str) -> list[tuple[str, str, str]]:
         html = self.client.get(DDG_URL.format(query=quote_plus(query))).text
-        soup = BeautifulSoup(html, "lxml")
+        soup = make_soup(html)
         out = []
         for result in soup.select(".result"):
             link = result.select_one(".result__a")

@@ -42,6 +42,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out", default="reports", help="папка отчётов")
     parser.add_argument("--list-shops", action="store_true",
                         help="показать магазины города в API Dina и выйти")
+    parser.add_argument("--compact", action="store_true",
+                        help="узкая таблица в консоли (5 колонок) — удобно на телефоне")
     return parser.parse_args(argv)
 
 
@@ -58,6 +60,7 @@ def _apply_overrides(config, args: argparse.Namespace) -> None:
         config.sources["web"] = False
     if args.no_history:
         config.use_history = False
+    config.compact = args.compact
     if args.source:
         wanted = {s.strip().lower() for s in args.source.split(",") if s.strip()}
         for code in config.sources:
@@ -117,7 +120,11 @@ def main(argv: list[str] | None = None) -> int:
         xlsx_path = _unique_path(out_dir / f"energy_scout_{stamp}.xlsx")
         html_path = out_dir / "latest_report.html"
         write_csv(csv_path, report.products)
-        write_xlsx(xlsx_path, report)
+        try:
+            write_xlsx(xlsx_path, report)
+        except ImportError as exc:
+            console.print(f"[yellow]{exc}[/]")
+            xlsx_path = None
         write_html(html_path, report.products, config.city)
         if history:
             history.close()
@@ -151,12 +158,14 @@ def _unique_path(path: Path) -> Path:
         counter += 1
 
 
-def PanelReport(csv_path: Path, xlsx_path: Path, html_path: Path):
+def PanelReport(csv_path: Path, xlsx_path: Path | None, html_path: Path):
     from rich.panel import Panel
-    return Panel(
-        f"CSV:  [bold]{csv_path}[/]\nXLSX: [bold]{xlsx_path}[/]\nHTML: [bold]{html_path}[/]",
-        title="Отчёты сохранены", expand=False,
-    )
+    lines = [
+        f"CSV:  [bold]{csv_path}[/]",
+        f"XLSX: [bold]{xlsx_path}[/]" if xlsx_path else "XLSX: [yellow]пропущен (нет openpyxl)[/]",
+        f"HTML: [bold]{html_path}[/]",
+    ]
+    return Panel("\n".join(lines), title="Отчёты сохранены", expand=False)
 
 
 if __name__ == "__main__":

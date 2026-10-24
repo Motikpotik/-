@@ -7,10 +7,6 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.utils import get_column_letter
-
 from ..models import Product
 from ..pipeline import RunReport
 
@@ -50,6 +46,15 @@ def write_csv(path: Path, products: list[Product]) -> None:
 
 
 def write_xlsx(path: Path, report: RunReport) -> None:
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Alignment, Font, PatternFill
+        from openpyxl.utils import get_column_letter
+    except ImportError as exc:
+        raise ImportError(
+            "Для Excel-отчёта нужен openpyxl: pip install openpyxl "
+            "(CSV и HTML работают и без него)"
+        ) from exc
     wb = Workbook()
     ws = wb.active
     ws.title = "Результаты"
