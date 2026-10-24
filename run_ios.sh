@@ -9,14 +9,43 @@
 #   2. В a-Shell перейдите в папку:  cd energy-scout
 #   3. Первый запуск:                 sh run_ios.sh --demo
 #   4. Боевой прогон:                 sh run_ios.sh
+#
+#  Диагностика, если что-то не работает:  python3 run.py --doctor
 # ============================================================
 cd "$(dirname "$0")" || exit 1
 
-# lxml/PyYAML не обязательны: парсер уйдёт на html.parser,
-# конфиг — на значения по умолчанию. Ставим только нужное.
-python3 -c "import httpx, bs4, rich" 2>/dev/null || \
-  pip install httpx beautifulsoup4 rich
-python3 -c "import openpyxl" 2>/dev/null || \
-  echo "openpyxl не установлен — Excel-отчёт будет пропущен (pip install openpyxl)"
+# В a-Shell интерпретатор называется python3; на всякий случай — fallback на python.
+if command -v python3 >/dev/null 2>&1; then
+  PY=python3
+elif command -v python >/dev/null 2>&1; then
+  PY=python
+else
+  echo "Python не найден. Установите a-Shell из App Store."
+  exit 1
+fi
+echo "==> Интерпретатор: $($PY --version 2>&1)"
 
-python3 run.py --compact "$@"
+# ВАЖНО: ставим пакеты через "$PY -m pip", а не голым pip —
+# иначе pip может относиться к другому окружению, чем python3.
+if ! $PY -c "import httpx, bs4, rich" 2>/dev/null; then
+  echo "==> Устанавливаю обязательные пакеты (httpx, beautifulsoup4, rich)…"
+  $PY -m pip install httpx beautifulsoup4 rich || {
+    echo "Ошибка установки пакетов. Запустите диагностику: $PY run.py --doctor"
+    exit 1
+  }
+fi
+
+# Опциональные пакеты: без них скрипт работает (см. README).
+$PY -c "import openpyxl" 2>/dev/null \
+  && echo "==> openpyxl есть — Excel-отчёт будет создан" \
+  || echo "==> openpyxl нет — Excel пропускается (поставить: $PY -m pip install openpyxl)"
+$PY -c "import lxml" 2>/dev/null \
+  && echo "==> lxml есть — быстрый HTML-парсер" \
+  || echo "==> lxml нет — используется встроенный html.parser (медленнее, но работает)"
+$PY -c "import yaml" 2>/dev/null \
+  && echo "==> PyYAML есть — config.yaml поддерживается" \
+  || echo "==> PyYAML нет — работают значения по умолчанию и флаги команды"
+
+echo "==> Запуск: $PY run.py --compact $*"
+"$PY" run.py --compact "$@"
+exit $?

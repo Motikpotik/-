@@ -44,6 +44,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="показать магазины города в API Dina и выйти")
     parser.add_argument("--compact", action="store_true",
                         help="узкая таблица в консоли (5 колонок) — удобно на телефоне")
+    parser.add_argument("--doctor", action="store_true",
+                        help="диагностика: версии пакетов и доступность сайтов, затем выход")
     return parser.parse_args(argv)
 
 
@@ -89,6 +91,10 @@ def main(argv: list[str] | None = None) -> int:
     config = load_config(args.config if Path(args.config).exists() else None)
     _apply_overrides(config, args)
     console = Console()
+
+    if args.doctor:
+        from .doctor import run_doctor
+        return run_doctor()
 
     client = FixtureClient(FIXTURES_DIR) if args.demo else HttpClient(
         delay=config.delay_seconds,

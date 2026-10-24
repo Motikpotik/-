@@ -52,7 +52,7 @@ def write_xlsx(path: Path, report: RunReport) -> None:
         from openpyxl.utils import get_column_letter
     except ImportError as exc:
         raise ImportError(
-            "Для Excel-отчёта нужен openpyxl: pip install openpyxl "
+            "Для Excel-отчёта нужен openpyxl: python3 -m pip install openpyxl "
             "(CSV и HTML работают и без него)"
         ) from exc
     wb = Workbook()

@@ -40,6 +40,27 @@ class NormalizeTests(unittest.TestCase):
         self.assertEqual(normalize_name("Monster, Ultra!"), "monster ultra")
 
 
+class DoctorTests(unittest.TestCase):
+    def test_doctor_runs_without_network(self):
+        import io
+        from unittest import mock
+        from rich.console import Console
+        from energy_scout.doctor import run_doctor
+
+        class FakeResp:
+            status_code = 200
+
+        buf = io.StringIO()
+        with mock.patch("httpx.get", return_value=FakeResp()), \
+                mock.patch("energy_scout.doctor.Console", return_value=Console(file=buf)):
+            code = run_doctor()
+        self.assertEqual(code, 0)
+        out = buf.getvalue()
+        self.assertIn("Python", out)
+        self.assertIn("httpx", out)
+        self.assertIn("Dina API", out)
+
+
 class HtmlFallbackTests(unittest.TestCase):
     def test_soup_helper_works(self):
         from energy_scout.html import HTML_PARSER, make_soup
