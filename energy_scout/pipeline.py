@@ -10,6 +10,7 @@ from .sources.anvar import AnvarSource
 from .sources.base import BaseSource, SourceResult
 from .sources.dina import DinaSource
 from .sources.magnum import MagnumSource
+from .sources.marwin import MarwinSource
 from .sources.websearch import WebSearchSource
 
 TIER_RANK = {"exclusive": 0, "rare": 1, "ordinary": 2}
@@ -40,6 +41,7 @@ def build_sources(client, config: Config) -> list[BaseSource]:
     registry = {
         "dina": DinaSource,
         "magnum": MagnumSource,
+        "marwin": MarwinSource,
         "anvar": AnvarSource,
         "web": WebSearchSource,
     }

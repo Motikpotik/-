@@ -12,6 +12,7 @@ from ..models import Product
 SOURCE_LABELS = {
     "dina": "Dina (dinamarket.kz)",
     "magnum": "Magnum — каталог скидок",
+    "marwin": "Marwin/Meloman (marwin.kz)",
     "anvar_promo": "Anvar — промо-листовки",
     "web": "Веб-поиск",
 }

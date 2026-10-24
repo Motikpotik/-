@@ -347,6 +347,26 @@ class MagnumFixtureTests(unittest.TestCase):
         self.assertEqual(pipeline_one.price, 1390)
 
 
+class MarwinFixtureTests(unittest.TestCase):
+    def test_parse_category(self):
+        from energy_scout.sources.marwin import MarwinSource
+        result = MarwinSource(FixtureClient(FIXTURES), Config()).fetch()
+        self.assertEqual(result.errors, [])
+        # чипсы отсеяны, остались три энергетика
+        self.assertEqual(len(result.products), 3)
+        nitro = next(p for p in result.products if "Nitro" in p.name)
+        self.assertEqual(nitro.price, 2650)
+        self.assertTrue(nitro.in_stock)
+        self.assertEqual(nitro.brand, "Monster")
+        self.assertIn(nitro.rarity_tier, ("rare", "exclusive"))
+        self.assertTrue(nitro.url.endswith(".html"))
+        khaotic = next(p for p in result.products if "Khaotic" in p.name)
+        self.assertFalse(khaotic.in_stock)
+        self.assertIn("нет на складе сайта", " ".join(khaotic.tags))
+        redbull = next(p for p in result.products if "Red Bull" in p.name)
+        self.assertEqual(redbull.price, 1550)
+
+
 class AnvarFixtureTests(unittest.TestCase):
     def test_leaflet_scan(self):
         client = FixtureClient(FIXTURES)

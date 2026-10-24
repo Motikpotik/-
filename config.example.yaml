@@ -20,8 +20,9 @@ all_shops: false
 sources:
   dina: true          # полный каталог с ценами и остатками (GraphQL)
   magnum: true        # каталог скидок magnum.kz (SSR-HTML)
+  marwin: true        # Marwin/Meloman: импортные Monster, магазин в Keruen City
   anvar: true         # упоминания в промо-листовках, без цен
-  web: true           # веб-поиск (DuckDuckGo) как запасной источник редкостей
+  web: true           # веб-поиск (DuckDuckGo/Bing) как запасной источник редкостей
 
 # Что ищем. Любое слово из списка (без учёта регистра).
 keywords:

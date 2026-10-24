@@ -23,6 +23,7 @@ SITE_CHECKS = [
     ("Dina API", "https://backend.dinamarket.kz/health"),
     ("Dina сайт", "https://dinamarket.kz/ru/catalog"),
     ("Magnum", "https://magnum.kz/catalog?city=aktobe"),
+    ("Marwin", "https://www.marwin.kz/bezalkogol-nye-napitki/jenergeticheskie-napitki/"),
     ("Anvar", "https://www.anvar.kz/stock/catalogs/"),
     ("DuckDuckGo", "https://html.duckduckgo.com/html/?q=test"),
 ]

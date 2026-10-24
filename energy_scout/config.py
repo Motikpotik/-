@@ -26,6 +26,7 @@ DEFAULT_EXCLUSIONS = [
 DEFAULT_SOURCES = {
     "dina": True,
     "magnum": True,
+    "marwin": True,
     "anvar": True,
     "web": True,
 }

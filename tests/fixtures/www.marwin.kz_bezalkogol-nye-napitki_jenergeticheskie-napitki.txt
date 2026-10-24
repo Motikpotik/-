@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Энергетические напитки</title></head><body>
+<div class="products wrapper">
+  <div class="product-item-info">
+    <a href="/jenergeticheskie-napitki/napitok-jenergeticheskij-monster-energy-nitro-500-zh-b.html">
+      <img alt="Monster Напиток энергетический Energy Nitro 500 ж/б">
+    </a>
+    <a class="product-item-link"
+       href="/jenergeticheskie-napitki/napitok-jenergeticheskij-monster-energy-nitro-500-zh-b.html">
+       Monster Напиток энергетический Energy Nitro 500 ж/б</a>
+    <div class="price-box">ЦенаЦена 2&nbsp;650 ₸
+      <div class="tocart">В корзину</div>
+    </div>
+  </div>
+  <div class="product-item-info">
+    <a class="product-item-link"
+       href="/jenergeticheskie-napitki/monster-napitok-jenergeticheskij-khaotic-500-zh-b.html">
+       Monster Напиток энергетический Khaotic 500 ж/б</a>
+    <div class="price-box">ЦенаЦена 1&nbsp;990 ₸
+      <div class="stock">Узнать о появлении</div>
+    </div>
+  </div>
+  <div class="product-item-info">
+    <a class="product-item-link"
+       href="/jenergeticheskie-napitki/napitok-jenergeticheskij-355ml-red-bull.html">
+       Напиток энергетический 355мл Red Bull</a>
+    <div class="price-box">ЦенаЦена 1&nbsp;550 ₸
+      <div class="tocart">В корзину</div>
+    </div>
+  </div>
+  <div class="product-item-info">
+    <a class="product-item-link" href="/sneki/chipsy-lays-150-g.html">Чипсы Lays 150 г</a>
+    <div class="price-box">ЦенаЦена 569 ₸<div class="tocart">В корзину</div></div>
+  </div>
+</div>
+</body></html>
