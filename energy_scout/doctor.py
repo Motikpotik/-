@@ -14,6 +14,7 @@ PACKAGE_CHECKS = [
     ("bs4", "обязательный — разбор HTML"),
     ("lxml", "опциональный — быстрый парсер HTML"),
     ("rich", "обязательный — таблицы в консоли"),
+    ("numpy", "тянется openpyxl; в a-Shell бывает сломан"),
     ("openpyxl", "опциональный — Excel-отчёт"),
     ("yaml", "опциональный — config.yaml"),
 ]
@@ -30,7 +31,8 @@ SITE_CHECKS = [
 def run_doctor() -> int:
     console = Console()
     console.print(Panel(
-        f"Python {sys.version.split()[0]}  •  {platform.platform()}",
+        f"Python {sys.version.split()[0]}  •  {platform.platform()}\n"
+        f"Интерпретатор: {sys.executable}",
         title="Energy Scout — диагностика", expand=False,
     ))
 
@@ -43,11 +45,28 @@ def run_doctor() -> int:
             imported = importlib.import_module(module)
             version = getattr(imported, "__version__", "установлен")
             table.add_row(module, "[green]OK[/]", f"{version} — {note}")
-        except ImportError:
-            optional = "опциональн" in note
-            status = "[yellow]нет[/]" if optional else "[red]НЕТ[/]"
-            table.add_row(module, status, note)
+        except Exception as exc:  # noqa: BLE001 — ловим и ImportError, и TypeError битого numpy
+            optional = "опциональн" in note or "бывает сломан" in note
+            status = "[yellow]нет/сломан[/]" if optional else "[red]НЕТ[/]"
+            table.add_row(
+                module, status,
+                f"{note} — {type(exc).__name__}: {str(exc)[:70]}",
+            )
     console.print(table)
+
+    # Отдельная проверка: путь, которым Excel создаёт сам Energy Scout
+    # (он умеет обходить сломанный numpy через заглушку)
+    try:
+        from .compat import import_openpyxl
+        openpyxl = import_openpyxl()
+        table2 = Table(header_style="bold cyan", expand=False)
+        table2.add_column("Проверка Energy Scout")
+        table2.add_column("Результат")
+        table2.add_row("Excel через совместимый импорт",
+                       f"[green]работает[/] (openpyxl {openpyxl.__version__})")
+        console.print(table2)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[yellow]Excel-отчёт будет пропущен: {exc}[/]")
 
     net = Table(header_style="bold cyan", expand=False)
     net.add_column("Источник")
@@ -64,10 +83,11 @@ def run_doctor() -> int:
                              headers={"User-Agent": "EnergyScout/1.0 (doctor)"})
             net.add_row(name, f"[green]HTTP {resp.status_code}[/]", url)
         except Exception as exc:  # noqa: BLE001 — диагностика показывает любую ошибку
-            net.add_row(name, "[red]недоступен[/]", f"{type(exc).__name__}: {exc}")
+            net.add_row(name, "[red]недоступен[/]",
+                        f"{type(exc).__name__}: {str(exc)[:70]}")
     console.print(net)
     console.print(
-        "[dim]Если пакет помечен «нет», поставьте его командой того же интерпретатора:\n"
-        "python3 -m pip install openpyxl lxml PyYAML[/]"
+        "[dim]Если пакет помечен «нет/сломан», поставьте его командой того же "
+        "интерпретатора:\npython3 -m pip install openpyxl lxml PyYAML[/]"
     )
     return 0

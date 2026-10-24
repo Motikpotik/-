@@ -149,6 +149,10 @@ python run.py --out my_reports --no-history
 - `lxml` и `PyYAML` не обязательны: без них работает встроенный `html.parser`,
   а конфиг берётся из значений по умолчанию и флагов команды;
 - без `openpyxl` Excel пропускается, но CSV и HTML создаются как обычно;
+- если встроенный в a-Shell numpy сломан (частая история на Python 3.13,
+  ошибка `TypeError: ... __typing_prepare_subst__`), Energy Scout сам
+  отключает numpy через import-finder и открывает openpyxl в чистом
+  Python-режиме — Excel продолжает работать, ничего настраивать не нужно;
 - HTML-отчёт открывается из «Файлов» в Safari, CSV/XLSX — в Numbers или Excel;
 - запуск по расписанию настраивается через приложение **«Команды»** (Shortcuts):
   автоматизация → действие a-Shell с командой `cd Energy-Scout-main && sh run_ios.sh`.
@@ -159,6 +163,10 @@ python run.py --out my_reports --no-history
 ```
 python3 run.py --doctor
 ```
+
+`--doctor` показывает интерпретатор (`sys.executable`), статус каждого
+пакета (включая отдельную проверку numpy) и HTTP-доступность всех
+сайтов-источников, а также проверяет совместимый импорт openpyxl.
 
 Проверить код без интернета можно офлайн-демонстрацией:
 `python3 run.py --compact --demo`.

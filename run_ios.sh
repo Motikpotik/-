@@ -36,9 +36,14 @@ if ! $PY -c "import httpx, bs4, rich" 2>/dev/null; then
 fi
 
 # Опциональные пакеты: без них скрипт работает (см. README).
-$PY -c "import openpyxl" 2>/dev/null \
-  && echo "==> openpyxl есть — Excel-отчёт будет создан" \
-  || echo "==> openpyxl нет — Excel пропускается (поставить: $PY -m pip install openpyxl)"
+# Важно: в a-Shell openpyxl может падать из-за сломанного numpy —
+# внутри Energy Scout этот случай обходится заглушкой, проверка ниже общая.
+if $PY -c "import openpyxl" 2>/dev/null; then
+  echo "==> openpyxl есть — Excel-отчёт будет создан"
+else
+  echo "==> openpyxl недоступен напрямую — Energy Scout попробует совместимый режим"
+  echo "    (если Excel не создастся: $PY -m pip install openpyxl, иначе работают CSV/HTML)"
+fi
 $PY -c "import lxml" 2>/dev/null \
   && echo "==> lxml есть — быстрый HTML-парсер" \
   || echo "==> lxml нет — используется встроенный html.parser (медленнее, но работает)"

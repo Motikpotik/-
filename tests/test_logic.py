@@ -1,6 +1,7 @@
 """Офлайн-тесты: парсинг, редкость, адаптеры на фикстурах, весь пайплайн."""
 from __future__ import annotations
 
+import importlib
 import unittest
 from pathlib import Path
 
@@ -59,6 +60,108 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("Python", out)
         self.assertIn("httpx", out)
         self.assertIn("Dina API", out)
+
+
+class BrokenNumpyCompatTests(unittest.TestCase):
+    """Симуляция a-Shell: битый numpy роняет импорт openpyxl."""
+
+    def _install_broken_numpy(self):
+        import sys
+        import types
+
+        class BrokenNumpy(types.ModuleType):
+            def __getattr__(self, name):
+                raise TypeError(
+                    "descriptor '__typing_prepare_subst__' for "
+                    "'typing.TypeVar' objects doesn't apply"
+                )
+
+        for name in list(sys.modules):
+            if name == "numpy" or name.startswith("numpy."):
+                sys.modules.pop(name, None)
+        sys.modules["numpy"] = BrokenNumpy("numpy")
+
+    @staticmethod
+    def _restore(saved_numpy, saved_openpyxl, saved_meta_path):
+        import sys
+        for name in list(sys.modules):
+            if name == "numpy" or name.startswith("numpy.") \
+                    or name == "openpyxl" or name.startswith("openpyxl."):
+                sys.modules.pop(name, None)
+        if saved_numpy is not None:
+            sys.modules["numpy"] = saved_numpy
+        sys.modules.update(saved_openpyxl)
+        sys.meta_path = saved_meta_path
+
+    def test_openpyxl_rescued_by_blocker(self):
+        import sys
+        from energy_scout.compat import import_openpyxl
+
+        saved_numpy = sys.modules.pop("numpy", None)
+        saved_openpyxl = {k: sys.modules.pop(k) for k in list(sys.modules)
+                          if k == "openpyxl" or k.startswith("openpyxl.")}
+        saved_meta_path = list(sys.meta_path)
+        self._install_broken_numpy()
+        try:
+            openpyxl = import_openpyxl()
+            self.assertTrue(hasattr(openpyxl, "Workbook"))
+            # numpy теперь заблокирован: импорт даёт ImportError
+            with self.assertRaises(ImportError):
+                import numpy  # noqa: F401
+            # openpyxl работает в режиме без numpy
+            from openpyxl.compat.numbers import NUMPY
+            self.assertFalse(NUMPY)
+        finally:
+            self._restore(saved_numpy, saved_openpyxl, saved_meta_path)
+
+    def test_xlsx_written_under_broken_numpy(self):
+        import sys
+        import tempfile
+        from pathlib import Path
+        from energy_scout.compat import import_openpyxl
+        from energy_scout.pipeline import run_pipeline
+        from energy_scout.report.files import write_xlsx
+
+        saved_numpy = sys.modules.pop("numpy", None)
+        saved_openpyxl = {k: sys.modules.pop(k) for k in list(sys.modules)
+                          if k == "openpyxl" or k.startswith("openpyxl.")}
+        saved_meta_path = list(sys.meta_path)
+        self._install_broken_numpy()
+        try:
+            self.assertTrue(hasattr(import_openpyxl(), "Workbook"))
+            report = run_pipeline(FixtureClient(FIXTURES), Config())
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "report.xlsx"
+                write_xlsx(path, report)
+                self.assertTrue(path.exists() and path.stat().st_size > 0)
+        finally:
+            self._restore(saved_numpy, saved_openpyxl, saved_meta_path)
+
+
+class DoctorBrokenPackageTests(unittest.TestCase):
+    def test_doctor_survives_type_error(self):
+        import io
+        from unittest import mock
+        from rich.console import Console
+        from energy_scout.doctor import run_doctor
+
+        real_import = importlib.import_module
+
+        def fake_import(name, *args, **kwargs):
+            if name == "openpyxl":
+                raise TypeError("descriptor '__typing_prepare_subst__' boom")
+            return real_import(name, *args, **kwargs)
+
+        class FakeResp:
+            status_code = 200
+
+        buf = io.StringIO()
+        with mock.patch("energy_scout.doctor.importlib.import_module", side_effect=fake_import), \
+                mock.patch("httpx.get", return_value=FakeResp()), \
+                mock.patch("energy_scout.doctor.Console", return_value=Console(file=buf)):
+            code = run_doctor()
+        self.assertEqual(code, 0)
+        self.assertIn("boom", buf.getvalue())
 
 
 class HtmlFallbackTests(unittest.TestCase):

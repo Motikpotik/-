@@ -47,14 +47,13 @@ def write_csv(path: Path, products: list[Product]) -> None:
 
 def write_xlsx(path: Path, report: RunReport) -> None:
     try:
-        from openpyxl import Workbook
+        from ..compat import import_openpyxl
+        openpyxl = import_openpyxl()
         from openpyxl.styles import Alignment, Font, PatternFill
         from openpyxl.utils import get_column_letter
+        Workbook = openpyxl.Workbook
     except ImportError as exc:
-        raise ImportError(
-            "Для Excel-отчёта нужен openpyxl: python3 -m pip install openpyxl "
-            "(CSV и HTML работают и без него)"
-        ) from exc
+        raise ImportError(str(exc)) from exc
     wb = Workbook()
     ws = wb.active
     ws.title = "Результаты"
