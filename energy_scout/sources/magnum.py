@@ -139,6 +139,12 @@ class MagnumSource(BaseSource):
                         products.append(product)
         except Exception as exc:
             errors.append(f"Magnum: {exc}")
+            if self.config.debug:
+                self.config.debug.add("Magnum", f"сбор каталога упал: {exc}")
+        if not products and self.config.debug:
+            self.config.debug.add(
+                "Magnum", "0 товаров: изменилась вёрстка или нет акций по напиткам",
+            )
         return SourceResult(self.code, products, errors,
                             [f"каталог скидок, город {self.city_slug}"])
 

@@ -46,6 +46,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="узкая таблица в консоли (5 колонок) — удобно на телефоне")
     parser.add_argument("--doctor", action="store_true",
                         help="диагностика: версии пакетов и доступность сайтов, затем выход")
+    parser.add_argument("--verbose", action="store_true",
+                        help="подробный режим: всегда писать debug-лог с деталями запросов")
     return parser.parse_args(argv)
 
 
@@ -63,6 +65,7 @@ def _apply_overrides(config, args: argparse.Namespace) -> None:
     if args.no_history:
         config.use_history = False
     config.compact = args.compact
+    config.verbose = args.verbose
     if args.source:
         wanted = {s.strip().lower() for s in args.source.split(",") if s.strip()}
         for code in config.sources:
@@ -95,6 +98,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.doctor:
         from .doctor import run_doctor
         return run_doctor()
+
+    from .debug import DebugLog
+    debug_log = DebugLog()
+    config.debug = debug_log
 
     client = FixtureClient(FIXTURES_DIR) if args.demo else HttpClient(
         delay=config.delay_seconds,
@@ -138,6 +145,14 @@ def main(argv: list[str] | None = None) -> int:
         console.print(PanelReport(csv_path, xlsx_path, html_path))
         if report.errors:
             console.print("[yellow]Часть источников завершилась с ошибками — детали выше.[/]")
+        if report.errors or config.verbose:
+            log_path = _unique_path(out_dir / f"debug_{stamp}.log")
+            debug_log.write(log_path)
+            console.print(
+                f"[bold yellow]Отладочный лог:[/] {log_path}\n"
+                "[dim]Пришлите этот файл, если результаты неполные — в нём видно, "
+                "что именно ответил каждый сайт.[/]"
+            )
         return 0
     except KeyboardInterrupt:
         console.print("\n[yellow]Прервано пользователем.[/]")

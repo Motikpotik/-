@@ -39,6 +39,8 @@ class AnvarSource(BaseSource):
                 soup = make_soup(self.client.get(url).text)
             except Exception as exc:
                 errors.append(f"Anvar {url}: {exc}")
+                if self.config.debug:
+                    self.config.debug.add("Anvar", f"листовка {url} упала: {exc}")
                 continue
             text = soup.get_text("\n", strip=True)
             lower = text.lower()

@@ -51,6 +51,8 @@ class Config:
     output_dir: str = "reports"
     use_history: bool = True
     compact: bool = False       # узкая таблица в консоли (экраны телефонов)
+    verbose: bool = False       # подробный вывод + всегда писать debug-лог
+    debug: object | None = None  # energy_scout.debug.DebugLog, задаётся в CLI
 
     @property
     def search_terms(self) -> list[str]:

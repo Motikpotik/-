@@ -138,6 +138,88 @@ class BrokenNumpyCompatTests(unittest.TestCase):
             self._restore(saved_numpy, saved_openpyxl, saved_meta_path)
 
 
+class WebFallbackChainTests(unittest.TestCase):
+    """DDG html и lite молчат — должен сработать Bing."""
+
+    class _Resp:
+        def __init__(self, text):
+            self.text = text
+            self.status_code = 200
+
+    class _FakeClient:
+        def __init__(self, routing):
+            self.routing = routing
+            self.visited = []
+
+        def get(self, url, **kwargs):
+            self.visited.append(url)
+            for fragment, text in self.routing.items():
+                if fragment in url:
+                    return WebFallbackChainTests._Resp(text)
+            return WebFallbackChainTests._Resp("<html></html>")
+
+        def close(self):
+            pass
+
+    def test_bing_fallback(self):
+        from energy_scout.sources.websearch import WebSearchSource
+        bing_html = """
+        <ol id="b_results"><li class="b_algo">
+          <h2><a href="https://shop.kz/monster-nitro">Monster Nitro импорт США 0,473 — Актобе</a></h2>
+          <div class="b_caption"><p>Энергетический напиток Monster Nitro, импорт, цена 1 890 тг.</p></div>
+        </li></ol>"""
+        client = self._FakeClient({
+            "duckduckgo.com/html": "<html><body>проверка</body></html>",
+            "duckduckgo.com/lite": "<html></html>",
+            "bing.com": bing_html,
+        })
+        config = Config()
+        from energy_scout.debug import DebugLog
+        config.debug = DebugLog()
+        source = WebSearchSource(client, config)
+        results = source._search_chain("monster актобе")
+        self.assertEqual(len(results), 1)
+        self.assertIn("Monster Nitro", results[0][0])
+        # задействованы все три движка по порядку
+        joined = " ".join(client.visited)
+        self.assertIn("html.duckduckgo.com", joined)
+        self.assertIn("lite.duckduckgo.com", joined)
+        self.assertIn("bing.com", joined)
+
+    def test_ddg_lite_parser(self):
+        from energy_scout.sources.websearch import WebSearchSource
+        lite = """<table><tr><td><a class="result-link"
+        href="https://example.kz/x">Red Bull Summer Edition Актобе</a></td></tr>
+        <tr><td class="result-snippet">энергетический напиток, 990 тг</td></tr></table>"""
+        source = WebSearchSource(None, Config())
+        parsed = source._parse_ddg_lite(lite)
+        self.assertEqual(len(parsed), 1)
+        self.assertIn("Red Bull", parsed[0][0])
+        self.assertIn("990 тг", parsed[0][1])
+
+
+class HttpAndDebugTests(unittest.TestCase):
+    def test_http_error_contains_excerpt(self):
+        from energy_scout.http import HttpError
+        err = HttpError("https://x.kz/api", 403, "доступ запрещён")
+        self.assertEqual(err.status, 403)
+        self.assertIn("403", str(err))
+        self.assertIn("запрещён", str(err))
+
+    def test_debug_log_file(self):
+        import tempfile
+        from pathlib import Path
+        from energy_scout.debug import DebugLog
+        log = DebugLog()
+        log.add("Dina", "тестовая запись", "фрагмент ответа")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = log.write(Path(tmp) / "debug.log")
+            content = path.read_text(encoding="utf-8")
+        self.assertIn("Dina", content)
+        self.assertIn("тестовая запись", content)
+        self.assertIn("фрагмент ответа", content)
+
+
 class DoctorBrokenPackageTests(unittest.TestCase):
     def test_doctor_survives_type_error(self):
         import io

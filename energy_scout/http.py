@@ -9,9 +9,19 @@ from typing import Any
 import httpx
 
 USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/126.0 Safari/537.36 EnergyScout/1.0"
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 "
+    "(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1 EnergyScout/1.0"
 )
+
+
+class HttpError(Exception):
+    """Ошибка запроса с HTTP-статусом и фрагментом ответа для диагностики."""
+
+    def __init__(self, url: str, status: int, excerpt: str = "") -> None:
+        self.url = url
+        self.status = status
+        self.excerpt = excerpt
+        super().__init__(f"HTTP {status} {url} — {excerpt[:160]}")
 
 
 class HttpClient:
@@ -47,27 +57,44 @@ class HttpClient:
                 resp = self._client.request(method, url, **kwargs)
                 self._last_request_at = time.monotonic()
                 if resp.status_code in (429, 500, 502, 503, 504):
-                    raise httpx.HTTPStatusError(
-                        f"HTTP {resp.status_code}", request=resp.request, response=resp
-                    )
+                    raise HttpError(url, resp.status_code,
+                                    resp.text[:200].replace("\n", " "))
+                if resp.status_code >= 400:
+                    raise HttpError(url, resp.status_code,
+                                    resp.text[:200].replace("\n", " "))
                 return resp
+            except HttpError:
+                # 4xx кроме 429 повторять бессмысленно
+                raise
             except (httpx.HTTPError, httpx.TransportError) as exc:
                 last_exc = exc
                 if attempt == self.max_retries:
                     break
                 time.sleep(min(2 ** attempt, 10))
-        raise ConnectionError(f"Запрос не удался после {self.max_retries} попыток: {url} — {last_exc}")
+        raise ConnectionError(
+            f"Запрос не удался после {self.max_retries} попыток: {url} — {last_exc}"
+        )
 
     def get(self, url: str, **kwargs: Any) -> httpx.Response:
         return self.request("GET", url, **kwargs)
 
-    def post_json(self, url: str, payload: dict) -> dict:
+    def post_json(self, url: str, payload: dict,
+                  extra_headers: dict | None = None) -> dict:
+        headers = {"Content-Type": "application/json; charset=utf-8"}
+        if extra_headers:
+            headers.update(extra_headers)
         resp = self.request(
             "POST", url,
             content=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-            headers={"Content-Type": "application/json; charset=utf-8"},
+            headers=headers,
         )
-        return resp.json()
+        try:
+            return resp.json()
+        except json.JSONDecodeError as exc:
+            raise HttpError(
+                url, resp.status_code,
+                f"ожидался JSON, получено: {resp.text[:200]!r}",
+            ) from exc
 
     def close(self) -> None:
         self._client.close()
@@ -97,7 +124,8 @@ class FixtureClient:
         key = url.split("?", 1)[0].rstrip("/").split("://")[-1].replace("/", "_")
         return FixtureResponse(self._load(f"{key}.txt"))
 
-    def post_json(self, url: str, payload: dict) -> dict:
+    def post_json(self, url: str, payload: dict,
+                  extra_headers: dict | None = None) -> dict:
         self.calls.append(("POST", url))
         operation = self._operation(payload)
         return json.loads(self._load(f"dina_graph_{operation}.json"))

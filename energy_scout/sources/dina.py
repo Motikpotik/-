@@ -16,6 +16,11 @@ from ..rarity import classify_rarity, detect_brand
 from .base import BaseSource, SourceResult
 
 GRAPH_URL = "https://backend.dinamarket.kz/api/v1.1/customer/graph"
+GRAPH_HEADERS = {
+    "Origin": "https://dinamarket.kz",
+    "Referer": "https://dinamarket.kz/",
+    "Accept": "application/json",
+}
 PAGE_SIZE = 24  # сервер урезает _limit до 24
 
 SHOPS_QUERY = "{ shops { id name city { name } } }"
@@ -41,11 +46,18 @@ class DinaSource(BaseSource):
     label = "Dina (dinamarket.kz)"
 
     def _graph(self, query: str, variables: dict | None = None) -> dict[str, Any]:
-        data = self.client.post_json(
-            GRAPH_URL, {"query": query, "variables": variables or {}}
-        )
+        payload = {"query": query, "variables": variables or {}}
+        try:
+            data = self.client.post_json(GRAPH_URL, payload, extra_headers=GRAPH_HEADERS)
+        except Exception as exc:
+            if self.config.debug:
+                self.config.debug.add("Dina", f"запрос к API упал: {exc}")
+            raise
         if data.get("errors"):
-            raise RuntimeError("; ".join(str(e.get("message", e)) for e in data["errors"]))
+            message = "; ".join(str(e.get("message", e)) for e in data["errors"])
+            if self.config.debug:
+                self.config.debug.add("Dina", f"GraphQL-ошибка: {message}", str(data)[:500])
+            raise RuntimeError(message)
         return data.get("data") or {}
 
     def list_city_shops(self) -> list[dict]:
@@ -70,6 +82,12 @@ class DinaSource(BaseSource):
     def _fetch_shop_products(self, shop: dict) -> list[Product]:
         category = self._energy_category(shop["id"])
         if not category:
+            if self.config.debug:
+                cats = self._graph(CATEGORIES_QUERY, {"shopId": shop["id"]}).get("categories") or []
+                self.config.debug.add(
+                    "Dina", "категория энергетиков не найдена",
+                    "доступные категории: " + ", ".join(str(c.get("name")) for c in cats[:40]),
+                )
             raise RuntimeError(f"категория «Энергетики» не найдена для магазина {shop['name']}")
 
         products: list[Product] = []
@@ -156,6 +174,17 @@ class DinaSource(BaseSource):
             return SourceResult(self.code, [], [f"Dina: не удалось получить магазины: {exc}"], [])
 
         if not shops:
+            if self.config.debug:
+                try:
+                    all_shops = self._graph(SHOPS_QUERY).get("shops") or []
+                    sample = [f"{s.get('id')}:{(s.get('city') or {}).get('name')}"
+                              for s in all_shops[:15]]
+                    self.config.debug.add(
+                        "Dina", "магазины города не найдены",
+                        f"алиасы={self.config.city_aliases}; пример магазинов API: {sample}",
+                    )
+                except Exception:
+                    pass
             return SourceResult(
                 self.code, [],
                 [f"Dina: в API не найдено магазинов города по алиасам {self.config.city_aliases}"],
